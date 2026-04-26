@@ -227,7 +227,8 @@ def delete_all_users():
     db.session.commit()
     return jsonify({"status": "success"})
 
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
