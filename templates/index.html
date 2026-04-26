@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite — Your Lifelong AI Companion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+<canvas id="infinite-canvas"></canvas>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="logo-symbol">∞</div>
+            <h1>Infinite</h1>
+            <p>Your lifelong AI companion</p>
+        </div>
+
+        <!-- Login -->
+        <div id="login-form">
+            <h2>Welcome back</h2>
+            <p class="auth-subtitle">Sign in to continue your journey</p>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="login-email" placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="login-password" placeholder="••••••••">
+            </div>
+            <div id="login-error" class="error-msg"></div>
+            <button class="auth-btn" onclick="handleLogin()">Sign In</button>
+            <p class="auth-switch">Don't have an account? <span onclick="showSignup()">Create one</span></p>
+        </div>
+
+        <!-- Signup -->
+        <div id="signup-form" style="display:none">
+            <h2>Join Infinite</h2>
+            <p class="auth-subtitle">Create your personal learning profile</p>
+            <div id="signup-step-1">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signup-name" placeholder="Your full name">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signup-email" placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signup-password" placeholder="Create a strong password">
+                </div>
+                <button class="auth-btn" onclick="showSignupStep2()">Continue →</button>
+            </div>
+            <div id="signup-step-2" style="display:none">
+                <div class="form-group">
+                    <label>School / University Name</label>
+                    <input type="text" id="signup-school" placeholder="Your school or university">
+                </div>
+                <div class="form-group">
+                    <label>Curriculum</label>
+                    <select id="signup-curriculum">
+                        <option value="">Select your curriculum</option>
+                        <option value="Cambridge IGCSE/A-Levels">Cambridge IGCSE / A-Levels</option>
+                        <option value="IB">IB (International Baccalaureate)</option>
+                        <option value="Saudi MOE">Saudi MOE</option>
+                        <option value="CBSE">CBSE</option>
+                        <option value="AP">AP (Advanced Placement)</option>
+                        <option value="University">University / College</option>
+                        <option value="Professional">Working Professional</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Grade / Year</label>
+                    <select id="signup-grade">
+                        <option value="">Select your grade</option>
+                        <option value="Grade 6">Grade 6</option>
+                        <option value="Grade 7">Grade 7</option>
+                        <option value="Grade 8">Grade 8</option>
+                        <option value="Grade 9">Grade 9</option>
+                        <option value="Grade 10">Grade 10</option>
+                        <option value="Grade 11">Grade 11</option>
+                        <option value="Grade 12">Grade 12</option>
+                        <option value="Year 1 University">Year 1 — University</option>
+                        <option value="Year 2 University">Year 2 — University</option>
+                        <option value="Year 3 University">Year 3 — University</option>
+                        <option value="Year 4 University">Year 4 — University</option>
+                        <option value="Postgraduate">Postgraduate</option>
+                        <option value="Professional">Working Professional</option>
+                    </select>
+                </div>
+                <div id="signup-error" class="error-msg"></div>
+                <button class="auth-btn" onclick="handleSignup()">Create Account</button>
+                <p class="auth-switch back-link" onclick="showSignupStep1()">← Back</p>
+            </div>
+            <p class="auth-switch">Already have an account? <span onclick="showLogin()">Sign in</span></p>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app-screen" class="app-screen" style="display:none">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">∞</div>
+                <div class="logo-text">
+                    <h1>Infinite</h1>
+                    <p id="user-greeting">Welcome</p>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-label">MENU</div>
+        <div class="sidebar-menu">
+            <button class="menu-item" onclick="newChat()">
+                <i class="fas fa-plus"></i>
+                <div class="menu-item-text">
+                    <span>New Chat</span>
+                    <small>Start fresh</small>
+                </div>
+            </button>
+            <button class="menu-item" onclick="showAdmin()">
+                <i class="fas fa-shield-halved"></i>
+                <div class="menu-item-text">
+                    <span>Admin Panel</span>
+                    <small>Manage accounts</small>
+                </div>
+            </button>
+        </div>
+        <div class="sidebar-footer">
+            <div class="user-info-box">
+                <div class="user-avatar" id="user-avatar">∞</div>
+                <div class="user-details">
+                    <span id="sidebar-username">User</span>
+                    <span id="sidebar-school">School</span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()" title="Logout">
+                <i class="fas fa-right-from-bracket"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <div class="header-left">
+                <div class="status-dot"></div>
+                <span class="header-title">Infinite</span>
+            </div>
+            <div class="mode-selector-wrap">
+                <div class="mode-selector" id="mode-selector" onclick="toggleDropdown()">
+                    <span id="mode-icon">☀️</span>
+                    <span id="mode-label">Basic</span>
+                    <i class="fas fa-chevron-down" id="mode-chevron"></i>
+                </div>
+                <div class="mode-dropdown" id="mode-dropdown">
+                    <div class="mode-option" data-mode="basic" onclick="selectMode('basic')">
+                        <span class="opt-icon">☀️</span>
+                        <div class="opt-text">
+                            <span class="opt-name">Basic</span>
+                            <span class="opt-desc">Daily life help</span>
+                        </div>
+                    </div>
+                    <div class="mode-option" data-mode="school" onclick="selectMode('school')">
+                        <span class="opt-icon">🎓</span>
+                        <div class="opt-text">
+                            <span class="opt-name">School</span>
+                            <span class="opt-desc">Homework & exams</span>
+                        </div>
+                    </div>
+                    <div class="mode-option" data-mode="university" onclick="selectMode('university')">
+                        <span class="opt-icon">🏛️</span>
+                        <div class="opt-text">
+                            <span class="opt-name">University</span>
+                            <span class="opt-desc">Advanced learning</span>
+                        </div>
+                    </div>
+                    <div class="mode-option" data-mode="coding" onclick="selectMode('coding')">
+                        <span class="opt-icon">💻</span>
+                        <div class="opt-text">
+                            <span class="opt-name">Coding & Web</span>
+                            <span class="opt-desc">Build anything</span>
+                        </div>
+                    </div>
+                    <div class="mode-option" data-mode="applaunch" onclick="selectMode('applaunch')">
+                        <span class="opt-icon">🚀</span>
+                        <div class="opt-text">
+                            <span class="opt-name">App Launch</span>
+                            <span class="opt-desc">Build your brand</span>
+                        </div>
+                    </div>
+                    <div class="mode-option fullpower-opt" data-mode="fullpower" onclick="selectMode('fullpower')">
+                        <span class="opt-icon">⚡</span>
+                        <div class="opt-text">
+                            <span class="opt-name">Full Power</span>
+                            <span class="opt-desc">🔒 Password required</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="model-tag">
+                <i class="fas fa-microchip"></i>
+                LLaMA 3.3 70B
+            </div>
+        </div>
+
+        <div class="messages" id="messages">
+            <div class="welcome-wrap" id="welcome-wrap">
+                <div class="welcome-icon">∞</div>
+                <h2 id="welcome-title">Welcome to Infinite</h2>
+                <p id="welcome-sub">Your personal AI companion. Ask me anything.</p>
+                <div class="quick-btns" id="quick-btns">
+                    <button onclick="quickSend('Help me with something today')">✨ Daily Help</button>
+                    <button onclick="quickSend('Help me with my homework')">📚 Homework</button>
+                    <button onclick="quickSend('Create a test for me on any topic')">📝 Take a Test</button>
+                    <button onclick="quickSend('Predict my upcoming exam questions')">🔮 Exam Predictor</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-wrap">
+            <div class="input-box">
+                <label class="clip-btn" for="file-input" title="Attach file">
+                    <i class="fas fa-paperclip"></i>
+                    <input type="file" id="file-input" accept="image/*,.pdf" style="display:none" onchange="handleFile(this)">
+                </label>
+                <textarea id="user-input" placeholder="Ask Infinite anything..." rows="1"
+                    onkeydown="handleKey(event)" oninput="autoGrow(this)"></textarea>
+                <button class="send-btn" id="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <p class="input-note">Enter to send · Shift+Enter for new line · Attach images or PDFs</p>
+        </div>
+    </div>
+</div>
+
+<!-- FULL POWER MODAL -->
+<div id="fp-modal" class="overlay" style="display:none">
+    <div class="modal-box">
+        <div class="modal-emoji">⚡</div>
+        <h2>Full Power Mode</h2>
+        <p>Unlocks Infinite's maximum capability with no restrictions. Enter the password to continue.</p>
+        <div class="form-group">
+            <input type="password" id="fp-input" placeholder="Enter password">
+        </div>
+        <div id="fp-error" class="error-msg"></div>
+        <div id="fp-attempts" class="warn-msg"></div>
+        <button class="auth-btn" id="fp-btn" onclick="verifyFP()">Unlock ⚡</button>
+        <button class="cancel-btn" onclick="closeOverlay('fp-modal')">Cancel</button>
+    </div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div id="admin-modal" class="overlay" style="display:none">
+    <div class="modal-box admin-box">
+        <div class="modal-top">
+            <h2>⚙️ Admin Panel</h2>
+            <button class="x-btn" onclick="closeOverlay('admin-modal')">✕</button>
+        </div>
+        <button class="danger-btn" onclick="deleteAll()">
+            <i class="fas fa-trash"></i> Delete All Accounts
+        </button>
+        <h3 style="margin-top:24px;margin-bottom:6px;font-size:15px;font-weight:600;">Grant Full Power Access</h3>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Select a user to grant free Full Power — no password needed for them.</p>
+        <div id="users-list" class="users-list">
+            <p class="muted-text">Loading...</p>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
