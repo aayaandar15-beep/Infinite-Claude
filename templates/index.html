@@ -20,8 +20,6 @@
             <h1>Infinite</h1>
             <p>Your lifelong AI companion</p>
         </div>
-
-        <!-- Login -->
         <div id="login-form">
             <h2>Welcome back</h2>
             <p class="auth-subtitle">Sign in to continue your journey</p>
@@ -37,8 +35,6 @@
             <button class="auth-btn" onclick="handleLogin()">Sign In</button>
             <p class="auth-switch">Don't have an account? <span onclick="showSignup()">Create one</span></p>
         </div>
-
-        <!-- Signup -->
         <div id="signup-form" style="display:none">
             <h2>Join Infinite</h2>
             <p class="auth-subtitle">Create your personal learning profile</p>
@@ -106,47 +102,51 @@
 
 <!-- MAIN APP -->
 <div id="app-screen" class="app-screen" style="display:none">
+
+    <!-- SIDEBAR -->
     <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo">
+        <!-- Top: Logo + New Chat -->
+        <div class="sidebar-top">
+            <div class="sidebar-logo">
                 <div class="logo-icon">∞</div>
-                <div class="logo-text">
-                    <h1>Infinite</h1>
-                    <p id="user-greeting">Welcome</p>
-                </div>
+                <span class="logo-name">Infinite</span>
             </div>
-        </div>
-        <div class="sidebar-label">MENU</div>
-        <div class="sidebar-menu">
-            <button class="menu-item" onclick="newChat()">
-                <i class="fas fa-plus"></i>
-                <div class="menu-item-text">
-                    <span>New Chat</span>
-                    <small>Start fresh</small>
-                </div>
+            <button class="new-chat-btn" onclick="startNewChat()" title="New Chat">
+                <i class="fas fa-pen-to-square"></i>
             </button>
-            <button class="menu-item" onclick="showAdmin()">
+        </div>
+
+        <!-- Search -->
+        <div class="sidebar-search">
+            <i class="fas fa-magnifying-glass"></i>
+            <input type="text" id="chat-search" placeholder="Search chats..." oninput="searchChats(this.value)">
+        </div>
+
+        <!-- Chat History -->
+        <div class="chat-history" id="chat-history">
+            <p class="history-empty">No chats yet. Start a new conversation!</p>
+        </div>
+
+        <!-- Bottom: User + Admin + Logout -->
+        <div class="sidebar-bottom">
+            <button class="admin-btn" onclick="showAdmin()">
                 <i class="fas fa-shield-halved"></i>
-                <div class="menu-item-text">
-                    <span>Admin Panel</span>
-                    <small>Manage accounts</small>
-                </div>
+                <span>Admin Panel</span>
             </button>
-        </div>
-        <div class="sidebar-footer">
-            <div class="user-info-box">
-                <div class="user-avatar" id="user-avatar">∞</div>
-                <div class="user-details">
+            <div class="user-row-bottom">
+                <div class="user-avatar-sm" id="user-avatar">∞</div>
+                <div class="user-info-sm">
                     <span id="sidebar-username">User</span>
                     <span id="sidebar-school">School</span>
                 </div>
+                <button class="logout-btn" onclick="handleLogout()" title="Logout">
+                    <i class="fas fa-right-from-bracket"></i>
+                </button>
             </div>
-            <button class="logout-btn" onclick="handleLogout()" title="Logout">
-                <i class="fas fa-right-from-bracket"></i>
-            </button>
         </div>
     </div>
 
+    <!-- MAIN CHAT -->
     <div class="main">
         <div class="header">
             <div class="header-left">
@@ -215,7 +215,7 @@
                 <div class="welcome-icon">∞</div>
                 <h2 id="welcome-title">Welcome to Infinite</h2>
                 <p id="welcome-sub">Your personal AI companion. Ask me anything.</p>
-                <div class="quick-btns" id="quick-btns">
+                <div class="quick-btns">
                     <button onclick="quickSend('Help me with something today')">✨ Daily Help</button>
                     <button onclick="quickSend('Help me with my homework')">📚 Homework</button>
                     <button onclick="quickSend('Create a test for me on any topic')">📝 Take a Test</button>
@@ -264,13 +264,26 @@
             <h2>⚙️ Admin Panel</h2>
             <button class="x-btn" onclick="closeOverlay('admin-modal')">✕</button>
         </div>
-        <button class="danger-btn" onclick="deleteAll()">
-            <i class="fas fa-trash"></i> Delete All Accounts
-        </button>
-        <h3 style="margin-top:24px;margin-bottom:6px;font-size:15px;font-weight:600;">Grant Full Power Access</h3>
-        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Select a user to grant free Full Power — no password needed for them.</p>
-        <div id="users-list" class="users-list">
-            <p class="muted-text">Loading...</p>
+
+        <!-- Grant Full Power -->
+        <div class="admin-section">
+            <h3>⚡ Grant Full Power Access</h3>
+            <p class="admin-desc">Select a user to grant free Full Power — no password needed for them.</p>
+            <div id="grant-list" class="users-list">
+                <p class="muted-text">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Delete Accounts -->
+        <div class="admin-section" style="margin-top:24px;">
+            <h3>🗑️ Delete Accounts</h3>
+            <p class="admin-desc">Select accounts to permanently delete.</p>
+            <div id="delete-list" class="users-list">
+                <p class="muted-text">Loading...</p>
+            </div>
+            <button class="danger-btn" id="delete-selected-btn" onclick="deleteSelectedAccounts()" style="margin-top:12px;display:none;">
+                <i class="fas fa-trash"></i> Delete Selected Accounts
+            </button>
         </div>
     </div>
 </div>

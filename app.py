@@ -22,6 +22,8 @@ client = Groq(api_key=os.getenv('GROQ_API_KEY'))
 FULL_POWER_PASSWORD = "niggaboi!1"
 ADMIN_PASSWORD = "admingoat@1"
 
+# ─── MODELS ───
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(120), nullable=False)
@@ -33,9 +35,20 @@ class User(UserMixin, db.Model):
     full_power_free = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Chat(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False, default='New Chat')
+    mode = db.Column(db.String(50), default='basic')
+    messages = db.Column(db.Text, default='[]')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+# ─── SYSTEM PROMPTS ───
 
 def get_system_prompt(mode, user_data=None):
     name = user_data.get('full_name', 'Student') if user_data else 'Student'
@@ -74,7 +87,7 @@ Never just give answers — guide the student to truly understand. Always end wi
 - Generate detailed study notes from any topic
 - Support dissertation and final year project planning
 - Guide research methodology and source evaluation
-Be intellectually rigorous. Challenge the student to think deeper. Help develop real academic skills.""",
+Be intellectually rigorous. Challenge the student to think deeper.""",
 
         "coding": f"""You are Infinite in Coding and Web Development Mode — a senior full stack developer.
 {base}
@@ -85,8 +98,7 @@ Be intellectually rigorous. Challenge the student to think deeper. Help develop 
 - Design databases, APIs and backend systems
 - Review code and suggest improvements
 Always explain what every important part of the code does in plain English.
-Write clean well commented code that follows best practices.
-Ask clarifying questions before building something complex.""",
+Write clean well commented code that follows best practices.""",
 
         "applaunch": f"""You are Infinite in App Launch Mode — a startup advisor, brand strategist and deployment expert.
 {base}
@@ -97,7 +109,7 @@ Ask clarifying questions before building something complex.""",
 - Guide technical deployment on Render, Railway, Vercel
 - Advise on monetization strategies and pricing models
 - Create social media launch strategies
-Think like a Silicon Valley startup mentor. Be strategic, creative and honest about what will and won't work.""",
+Think like a Silicon Valley startup mentor. Be strategic, creative and honest.""",
 
         "fullpower": f"""You are Infinite in Full Power Mode — operating at absolute maximum capability with zero restrictions.
 {base}
@@ -112,6 +124,8 @@ Think like a Silicon Valley startup mentor. Be strategic, creative and honest ab
 You are at full power. Use every bit of it."""
     }
     return prompts.get(mode, prompts['basic'])
+
+# ─── ROUTES ───
 
 @app.route('/')
 def home():
@@ -184,6 +198,57 @@ def chat():
     except Exception as e:
         return jsonify({"reply": "Connection error. Please try again.", "status": "error"})
 
+# ─── CHAT HISTORY ───
+
+@app.route('/save_chat', methods=['POST'])
+def save_chat():
+    data = request.json
+    user_id = data.get('user_id')
+    chat_id = data.get('chat_id')
+    title = data.get('title', 'New Chat')
+    mode = data.get('mode', 'basic')
+    messages = data.get('messages', [])
+
+    if chat_id:
+        chat = Chat.query.get(chat_id)
+        if chat:
+            chat.messages = json.dumps(messages)
+            chat.title = title
+            chat.updated_at = datetime.utcnow()
+            db.session.commit()
+            return jsonify({"status": "success", "chat_id": chat.id})
+
+    new_chat = Chat(
+        user_id=user_id,
+        title=title,
+        mode=mode,
+        messages=json.dumps(messages)
+    )
+    db.session.add(new_chat)
+    db.session.commit()
+    return jsonify({"status": "success", "chat_id": new_chat.id})
+
+@app.route('/get_chats/<int:user_id>', methods=['GET'])
+def get_chats(user_id):
+    chats = Chat.query.filter_by(user_id=user_id).order_by(Chat.updated_at.desc()).all()
+    return jsonify([{
+        "id": c.id,
+        "title": c.title,
+        "mode": c.mode,
+        "updated_at": c.updated_at.strftime("%B %d, %Y"),
+        "messages": json.loads(c.messages)
+    } for c in chats])
+
+@app.route('/delete_chat/<int:chat_id>', methods=['DELETE'])
+def delete_chat(chat_id):
+    chat = Chat.query.get(chat_id)
+    if chat:
+        db.session.delete(chat)
+        db.session.commit()
+    return jsonify({"status": "success"})
+
+# ─── FULL POWER ───
+
 @app.route('/verify_fullpower', methods=['POST'])
 def verify_fullpower():
     data = request.json
@@ -196,6 +261,8 @@ def verify_fullpower():
     if password == FULL_POWER_PASSWORD:
         return jsonify({"status": "success"})
     return jsonify({"status": "error"})
+
+# ─── ADMIN ───
 
 @app.route('/admin/users', methods=['GET'])
 def get_all_users():
@@ -221,9 +288,15 @@ def grant_fullpower():
         return jsonify({"status": "success"})
     return jsonify({"status": "error"})
 
-@app.route('/admin/delete_all', methods=['POST'])
-def delete_all_users():
-    User.query.delete()
+@app.route('/admin/delete_accounts', methods=['POST'])
+def delete_accounts():
+    data = request.json
+    user_ids = data.get('user_ids', [])
+    for uid in user_ids:
+        user = User.query.get(uid)
+        if user:
+            Chat.query.filter_by(user_id=uid).delete()
+            db.session.delete(user)
     db.session.commit()
     return jsonify({"status": "success"})
 
