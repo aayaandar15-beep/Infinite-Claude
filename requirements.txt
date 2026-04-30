@@ -4,3 +4,4 @@ flask-login
 groq
 python-dotenv
 gunicorn
+psycopg2-binary

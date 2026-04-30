@@ -7,10 +7,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Markdown renderer -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
-    <!-- Syntax highlighting -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 </head>
 <body>
@@ -19,12 +17,12 @@
 
 <!-- COLD START LOADER -->
 <div id="cold-loader" class="cold-loader">
-    <div class="cold-loader-inner">
-        <div class="cold-logo-anim">∞</div>
+    <div class="cold-inner">
+        <div class="cold-logo">∞</div>
         <h2>Infinite</h2>
-        <p id="cold-loader-msg">Waking up your AI companion...</p>
-        <div class="cold-bar"><div class="cold-bar-fill" id="cold-bar-fill"></div></div>
-        <span class="cold-note">First load may take up to 60 seconds on free hosting</span>
+        <p id="cold-msg">Waking up your AI companion...</p>
+        <div class="cold-bar"><div class="cold-fill" id="cold-fill"></div></div>
+        <span class="cold-note">First load may take up to 60s on free hosting</span>
     </div>
 </div>
 
@@ -37,10 +35,9 @@
             <p class="auth-tagline">Learn without limits</p>
         </div>
 
-        <!-- Login -->
         <div id="login-form">
             <h2>Welcome back</h2>
-            <p class="auth-subtitle">Sign in to continue your journey</p>
+            <p class="auth-sub">Sign in to continue your journey</p>
             <div class="form-group">
                 <label>Email</label>
                 <input type="email" id="login-email" placeholder="your@email.com" autocomplete="email">
@@ -49,21 +46,20 @@
                 <label>Password</label>
                 <div class="pw-wrap">
                     <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
-                    <button class="pw-toggle" onclick="togglePw('login-password',this)" type="button"><i class="fas fa-eye"></i></button>
+                    <button class="pw-eye" onclick="togglePw('login-password',this)" type="button"><i class="fas fa-eye"></i></button>
                 </div>
             </div>
             <div id="login-error" class="error-msg"></div>
             <button class="auth-btn" id="login-btn" onclick="handleLogin()">
-                <span>Sign In</span>
-                <i class="fas fa-arrow-right"></i>
+                <span>Sign In</span><i class="fas fa-arrow-right"></i>
             </button>
-            <p class="auth-switch">Don't have an account? <span onclick="showSignup()">Create one free</span></p>
+            <p class="auth-switch">No account? <span onclick="showSignup()">Create one free</span></p>
+            <div class="privacy-note"><i class="fas fa-lock"></i> Your data is stored securely. We never share or sell it.</div>
         </div>
 
-        <!-- Signup — simplified to 1 step -->
         <div id="signup-form" style="display:none">
             <h2>Join Infinite</h2>
-            <p class="auth-subtitle">Create your free account in seconds</p>
+            <p class="auth-sub">Free forever. No credit card needed.</p>
             <div class="form-group">
                 <label>Full Name</label>
                 <input type="text" id="signup-name" placeholder="Your full name">
@@ -75,34 +71,32 @@
             <div class="form-group">
                 <label>Password</label>
                 <div class="pw-wrap">
-                    <input type="password" id="signup-password" placeholder="Create a password">
-                    <button class="pw-toggle" onclick="togglePw('signup-password',this)" type="button"><i class="fas fa-eye"></i></button>
+                    <input type="password" id="signup-password" placeholder="At least 6 characters">
+                    <button class="pw-eye" onclick="togglePw('signup-password',this)" type="button"><i class="fas fa-eye"></i></button>
                 </div>
             </div>
             <div id="signup-error" class="error-msg"></div>
             <button class="auth-btn" id="signup-btn" onclick="handleSignup()">
-                <span>Create Account</span>
-                <i class="fas fa-arrow-right"></i>
+                <span>Create Free Account</span><i class="fas fa-arrow-right"></i>
             </button>
-            <p class="auth-switch">Already have an account? <span onclick="showLogin()">Sign in</span></p>
+            <p class="auth-switch">Have an account? <span onclick="showLogin()">Sign in</span></p>
+            <div class="privacy-note"><i class="fas fa-lock"></i> Your data is stored securely. We never share or sell it.</div>
         </div>
     </div>
 </div>
 
-<!-- PROFILE SETUP (shown after first signup) -->
+<!-- PROFILE SETUP -->
 <div id="profile-setup" class="overlay" style="display:none">
-    <div class="modal-box profile-setup-box">
-        <div class="setup-header">
-            <div class="setup-icon">🎓</div>
-            <h2>Set up your profile</h2>
-            <p>Help Infinite personalise your experience — especially for exam prediction!</p>
-        </div>
+    <div class="modal-box setup-box">
+        <div class="setup-emoji">🎓</div>
+        <h2>One last thing</h2>
+        <p>Help Infinite personalise your experience — especially for exam prediction!</p>
         <div class="form-group">
-            <label>School / University <span class="optional">optional</span></label>
+            <label>School / University <span class="opt-label">optional</span></label>
             <input type="text" id="setup-school" placeholder="Your school or university">
         </div>
         <div class="form-group">
-            <label>Curriculum <span class="optional">optional</span></label>
+            <label>Curriculum <span class="opt-label">optional</span></label>
             <select id="setup-curriculum">
                 <option value="">Select curriculum</option>
                 <option value="Cambridge IGCSE/A-Levels">Cambridge IGCSE / A-Levels</option>
@@ -116,7 +110,7 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Grade / Year <span class="optional">optional</span></label>
+            <label>Grade / Year <span class="opt-label">optional</span></label>
             <select id="setup-grade">
                 <option value="">Select grade</option>
                 <option value="Grade 6">Grade 6</option>
@@ -135,7 +129,7 @@
             </select>
         </div>
         <button class="auth-btn" onclick="saveProfileSetup()">Save & Continue</button>
-        <button class="skip-btn" onclick="skipProfileSetup()">Skip for now</button>
+        <button class="skip-btn" onclick="skipProfileSetup()">Skip for now →</button>
     </div>
 </div>
 
@@ -147,11 +141,11 @@
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-top">
-            <div class="sidebar-brand">
-                <div class="s-logo">∞</div>
-                <div class="s-brand-text">
-                    <span class="s-name">Infinite</span>
-                    <span class="s-tagline">Learn without limits</span>
+            <div class="brand">
+                <div class="brand-logo">∞</div>
+                <div class="brand-text">
+                    <span class="brand-name">Infinite</span>
+                    <span class="brand-tag">Learn without limits</span>
                 </div>
             </div>
             <button class="icon-btn" onclick="startNewChat()" title="New Chat">
@@ -165,28 +159,32 @@
         </div>
 
         <div class="chat-list" id="chat-history">
-            <p class="empty-history">No chats yet.<br>Start a conversation!</p>
+            <p class="empty-hist">No chats yet.<br>Start a conversation!</p>
         </div>
 
         <div class="sidebar-bottom">
+            <button class="settings-btn" onclick="showSettings()">
+                <i class="fas fa-gear"></i>
+                <span>Settings</span>
+            </button>
             <button class="admin-btn" onclick="showAdmin()">
                 <i class="fas fa-shield-halved"></i>
-                <span>Admin Panel</span>
+                <span>Admin</span>
             </button>
-            <div class="user-row-bottom">
-                <div class="profile-avatar" id="user-avatar">∞</div>
-                <div class="profile-info">
+            <div class="user-row">
+                <div class="user-av" id="user-avatar">∞</div>
+                <div class="user-info">
                     <span id="sidebar-username">User</span>
                     <span id="sidebar-school">School</span>
                 </div>
-                <button class="icon-btn-sm" onclick="handleLogout()" title="Logout">
+                <button class="icon-btn-xs" onclick="handleLogout()" title="Logout">
                     <i class="fas fa-right-from-bracket"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MAIN -->
+    <!-- MAIN CHAT -->
     <div class="main">
         <div class="header">
             <button class="menu-toggle" onclick="openSidebar()">
@@ -200,41 +198,47 @@
                     <i class="fas fa-chevron-down" id="mode-chevron"></i>
                 </div>
                 <div class="mode-dropdown" id="mode-dropdown">
-                    <div class="dropdown-label">SELECT MODE</div>
-                    <div class="mode-option" data-mode="basic" onclick="selectMode('basic')">
-                        <span class="opt-icon">☀️</span>
-                        <div class="opt-text"><span class="opt-name">Basic</span><span class="opt-desc">Daily life help</span></div>
+                    <div class="dd-label">SELECT MODE</div>
+                    <div class="mode-opt" data-mode="basic" onclick="selectMode('basic')">
+                        <span class="opt-ico">☀️</span>
+                        <div class="opt-info"><span class="opt-name">Basic</span><span class="opt-desc">Daily life help</span></div>
                     </div>
-                    <div class="mode-option" data-mode="school" onclick="selectMode('school')">
-                        <span class="opt-icon">🎓</span>
-                        <div class="opt-text"><span class="opt-name">School</span><span class="opt-desc">Homework & exams</span></div>
+                    <div class="mode-opt" data-mode="school" onclick="selectMode('school')">
+                        <span class="opt-ico">🎓</span>
+                        <div class="opt-info"><span class="opt-name">School</span><span class="opt-desc">Homework & exams</span></div>
                     </div>
-                    <div class="mode-option" data-mode="university" onclick="selectMode('university')">
-                        <span class="opt-icon">🏛️</span>
-                        <div class="opt-text"><span class="opt-name">University</span><span class="opt-desc">Advanced learning</span></div>
+                    <div class="mode-opt" data-mode="university" onclick="selectMode('university')">
+                        <span class="opt-ico">🏛️</span>
+                        <div class="opt-info"><span class="opt-name">University</span><span class="opt-desc">Advanced learning</span></div>
                     </div>
-                    <div class="mode-option" data-mode="coding" onclick="selectMode('coding')">
-                        <span class="opt-icon">💻</span>
-                        <div class="opt-text"><span class="opt-name">Coding & Web</span><span class="opt-desc">Build anything</span></div>
+                    <div class="mode-opt" data-mode="coding" onclick="selectMode('coding')">
+                        <span class="opt-ico">💻</span>
+                        <div class="opt-info"><span class="opt-name">Coding & Web</span><span class="opt-desc">Build anything</span></div>
                     </div>
-                    <div class="mode-option" data-mode="applaunch" onclick="selectMode('applaunch')">
-                        <span class="opt-icon">🚀</span>
-                        <div class="opt-text"><span class="opt-name">App Launch</span><span class="opt-desc">Build your brand</span></div>
+                    <div class="mode-opt" data-mode="applaunch" onclick="selectMode('applaunch')">
+                        <span class="opt-ico">🚀</span>
+                        <div class="opt-info"><span class="opt-name">App Launch</span><span class="opt-desc">Build your brand</span></div>
                     </div>
-                    <div class="mode-option infinite-opt" data-mode="infinite" onclick="selectMode('infinite')">
-                        <span class="opt-icon">🔄</span>
-                        <div class="opt-text"><span class="opt-name">Infinite Mode</span><span class="opt-desc">AI refines its own answers</span></div>
+                    <div class="mode-opt infinite-opt" data-mode="infinite" onclick="selectMode('infinite')">
+                        <span class="opt-ico">🔄</span>
+                        <div class="opt-info"><span class="opt-name">Infinite Mode ✨</span><span class="opt-desc">AI self-improves answers</span></div>
                     </div>
-                    <div class="mode-option fullpower-opt" data-mode="fullpower" onclick="selectMode('fullpower')">
-                        <span class="opt-icon">⚡</span>
-                        <div class="opt-text"><span class="opt-name">Full Power</span><span class="opt-desc">🔒 Maximum capability</span></div>
+                    <div class="mode-opt fullpower-opt" data-mode="fullpower" onclick="selectMode('fullpower')">
+                        <span class="opt-ico">⚡</span>
+                        <div class="opt-info"><span class="opt-name">Full Power</span><span class="opt-desc">🔒 Maximum capability</span></div>
                     </div>
                 </div>
             </div>
 
-            <div class="model-tag">
-                <div class="online-dot"></div>
-                <span class="model-tag-text">LLaMA 3.3 70B</span>
+            <div class="header-right">
+                <div class="status-tag" id="status-tag">
+                    <div class="status-dot" id="status-dot"></div>
+                    <span id="status-text">Connected</span>
+                </div>
+                <div class="model-tag">
+                    <i class="fas fa-microchip"></i>
+                    <span class="model-txt">LLaMA 3.3 70B</span>
+                </div>
             </div>
         </div>
 
@@ -246,24 +250,25 @@
                     <div class="welcome-ring"></div>
                 </div>
                 <h2 id="welcome-title">Welcome to Infinite</h2>
-                <p class="welcome-tagline">Learn without limits</p>
-                <p id="welcome-sub">Your personal AI companion powered by LLaMA 3.3 70B. Ask me anything.</p>
-                <div class="example-prompts">
-                    <div class="example-col">
-                        <button onclick="quickSend('Explain photosynthesis like I am 10 years old')">🌱 Explain photosynthesis simply</button>
-                        <button onclick="quickSend('Help me write a professional email to my teacher')">📧 Write a professional email</button>
-                    </div>
-                    <div class="example-col">
-                        <button onclick="quickSend('Create a 10 question test on World War 2')">📝 Create a history test</button>
-                        <button onclick="quickSend('Debug this code and explain the fix')">🐛 Debug my code</button>
-                    </div>
+                <p class="w-tagline">Learn without limits</p>
+                <p id="welcome-sub">Your AI companion powered by LLaMA 3.3 70B. Choose a mode and ask anything.</p>
+                <div class="example-grid">
+                    <button onclick="quickSend('Explain photosynthesis like I am 10 years old')">🌱 Explain a topic simply</button>
+                    <button onclick="quickSend('Create a 10 question test on World War 2 with answers')">📝 Create a test for me</button>
+                    <button onclick="quickSend('Predict likely exam questions for my upcoming biology exam')">🔮 Predict my exam</button>
+                    <button onclick="quickSend('Build me a complete landing page in HTML CSS and JavaScript')">💻 Build a webpage</button>
+                </div>
+                <div class="trust-row">
+                    <span><i class="fas fa-lock"></i> Private & Secure</span>
+                    <span><i class="fas fa-bolt"></i> Powered by Groq</span>
+                    <span><i class="fas fa-infinity"></i> Free Forever</span>
                 </div>
             </div>
         </div>
 
         <div class="input-wrap">
             <div class="input-box" id="input-box">
-                <label class="clip-btn" for="file-input" title="Attach file">
+                <label class="clip-btn" for="file-input">
                     <i class="fas fa-paperclip"></i>
                     <input type="file" id="file-input" accept="image/*,.pdf" style="display:none" onchange="handleFile(this)">
                 </label>
@@ -273,7 +278,10 @@
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
-            <p class="input-note">Enter to send · Shift+Enter for new line · Powered by Groq</p>
+            <div class="input-footer">
+                <span class="input-note">Enter to send · Shift+Enter for new line</span>
+                <span class="input-privacy"><i class="fas fa-lock"></i> Encrypted</span>
+            </div>
         </div>
     </div>
 </div>
@@ -283,17 +291,85 @@
     <div class="modal-box">
         <div class="modal-emoji">⚡</div>
         <h2>Full Power Mode</h2>
-        <p>Unlocks Infinite's maximum capability with zero restrictions. Enter the password to continue.</p>
+        <p>Unlocks Infinite's maximum capability with zero restrictions.</p>
         <div class="form-group">
             <div class="pw-wrap">
                 <input type="password" id="fp-input" placeholder="Enter password">
-                <button class="pw-toggle" onclick="togglePw('fp-input',this)" type="button"><i class="fas fa-eye"></i></button>
+                <button class="pw-eye" onclick="togglePw('fp-input',this)" type="button"><i class="fas fa-eye"></i></button>
             </div>
         </div>
         <div id="fp-error" class="error-msg"></div>
         <div id="fp-attempts" class="warn-msg"></div>
         <button class="auth-btn" id="fp-btn" onclick="verifyFP()">Unlock ⚡</button>
         <button class="cancel-btn" onclick="closeOverlay('fp-modal')">Cancel</button>
+    </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settings-modal" class="overlay" style="display:none">
+    <div class="modal-box settings-box">
+        <div class="modal-top">
+            <h2>⚙️ Settings</h2>
+            <button class="x-btn" onclick="closeOverlay('settings-modal')">✕</button>
+        </div>
+        <div class="settings-section">
+            <h3>Your Profile</h3>
+            <p class="settings-desc">Update your school details to improve exam prediction accuracy.</p>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="settings-name" placeholder="Your full name">
+            </div>
+            <div class="form-group">
+                <label>School / University</label>
+                <input type="text" id="settings-school" placeholder="Your school or university">
+            </div>
+            <div class="form-group">
+                <label>Curriculum</label>
+                <select id="settings-curriculum">
+                    <option value="">Select curriculum</option>
+                    <option value="Cambridge IGCSE/A-Levels">Cambridge IGCSE / A-Levels</option>
+                    <option value="IB">IB (International Baccalaureate)</option>
+                    <option value="Saudi MOE">Saudi MOE</option>
+                    <option value="CBSE">CBSE</option>
+                    <option value="AP">AP (Advanced Placement)</option>
+                    <option value="University">University / College</option>
+                    <option value="Professional">Working Professional</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Grade / Year</label>
+                <select id="settings-grade">
+                    <option value="">Select grade</option>
+                    <option value="Grade 6">Grade 6</option>
+                    <option value="Grade 7">Grade 7</option>
+                    <option value="Grade 8">Grade 8</option>
+                    <option value="Grade 9">Grade 9</option>
+                    <option value="Grade 10">Grade 10</option>
+                    <option value="Grade 11">Grade 11</option>
+                    <option value="Grade 12">Grade 12</option>
+                    <option value="Year 1 University">Year 1 — University</option>
+                    <option value="Year 2 University">Year 2 — University</option>
+                    <option value="Year 3 University">Year 3 — University</option>
+                    <option value="Year 4 University">Year 4 — University</option>
+                    <option value="Postgraduate">Postgraduate</option>
+                    <option value="Professional">Working Professional</option>
+                </select>
+            </div>
+            <div id="settings-msg" class="error-msg" style="color:var(--success)"></div>
+            <button class="auth-btn" onclick="saveSettings()">Save Changes</button>
+        </div>
+        <div class="settings-section">
+            <h3>About Infinite</h3>
+            <div class="about-row"><i class="fas fa-microchip"></i><span>Powered by LLaMA 3.3 70B via Groq</span></div>
+            <div class="about-row"><i class="fas fa-lock"></i><span>Your conversations are private and encrypted</span></div>
+            <div class="about-row"><i class="fas fa-database"></i><span>Data stored securely — never sold or shared</span></div>
+            <div class="about-row"><i class="fas fa-infinity"></i><span>Free forever — no hidden fees</span></div>
+            <div class="about-row"><i class="fas fa-globe"></i><span>Version 2.0 · Built with 🖤</span></div>
+        </div>
+        <button class="danger-btn" style="margin-top:8px;" onclick="handleLogout()">
+            <i class="fas fa-right-from-bracket"></i> Sign Out
+        </button>
     </div>
 </div>
 
@@ -306,7 +382,7 @@
         </div>
         <div class="admin-section">
             <h3>⚡ Grant Full Power</h3>
-            <p class="admin-desc">Give selected users free Full Power — no password needed for them.</p>
+            <p class="admin-desc">Give selected users free Full Power — no password needed.</p>
             <div id="grant-list" class="users-list"><p class="muted-text">Loading...</p></div>
         </div>
         <div class="admin-section">
@@ -314,7 +390,7 @@
             <p class="admin-desc">Select accounts to permanently delete.</p>
             <div id="delete-list" class="users-list"><p class="muted-text">Loading...</p></div>
             <button class="danger-btn" id="delete-selected-btn" onclick="deleteSelectedAccounts()" style="display:none;margin-top:12px;">
-                <i class="fas fa-trash"></i> Delete Selected Accounts
+                <i class="fas fa-trash"></i> Delete Selected
             </button>
         </div>
     </div>

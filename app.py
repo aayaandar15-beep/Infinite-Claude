@@ -11,7 +11,11 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = "infinite_super_secret_key_2025"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///infinite.db'
+
+database_url = os.getenv('DATABASE_URL', 'sqlite:///infinite.db')
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -21,8 +25,6 @@ client = Groq(api_key=os.getenv('GROQ_API_KEY'))
 
 FULL_POWER_PASSWORD = "niggaboi!1"
 ADMIN_PASSWORD = "admingoat@1"
-
-# ── MODELS ──
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,97 +50,100 @@ class Chat(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# ── SYSTEM PROMPTS ──
-
 def get_system_prompt(mode, user_data=None):
     name = user_data.get('full_name', 'Student') if user_data else 'Student'
     school = user_data.get('school', 'their school') if user_data else 'their school'
     curriculum = user_data.get('curriculum', 'their curriculum') if user_data else 'their curriculum'
     grade = user_data.get('grade', 'their grade') if user_data else 'their grade'
-    base = f"The user's name is {name}. They study at {school}, following the {curriculum} curriculum in {grade}. Personalise every response. Address them by first name naturally."
+    base = f"The user's name is {name}. They study at {school}, following the {curriculum} curriculum in {grade}. Always personalise responses and address them by first name."
 
     prompts = {
-        "basic": f"""You are Infinite in Basic Mode — a smart, warm and genuinely helpful daily life companion.
+        "basic": f"""You are Infinite in Basic Mode — a smart, warm daily life companion.
 {base}
-Help with everyday needs: answering questions, making decisions, planning days, wellness advice, general knowledge and life admin.
-Be conversational, friendly and direct. Talk like a brilliant friend who knows everything.
-Give real specific advice. Never be generic. Never start with "Certainly!" or "Great question!".
-Always end naturally — offer to help further or ask a follow up question.
-Use markdown formatting: **bold** for emphasis, bullet points for lists, ```code``` for code blocks.""",
+Help with everyday needs: decisions, planning, wellness, general knowledge, life admin.
+Be conversational and direct. Talk like a brilliant friend who knows everything.
+Never start with "Certainly!" or "Great question!". Use markdown formatting throughout.
+Always end naturally — offer to help further.""",
 
         "school": f"""You are Infinite in School Mode — an elite academic tutor.
 {base}
-Support all major curricula: Cambridge IGCSE/A-Levels, IB, AP, Saudi MOE, CBSE.
-- Explain any school subject with real examples and analogies
-- Help with homework step by step — guide thinking, don't just give answers
-- Create custom tests, grade answers, explain mistakes in full detail
-- Predict likely exam questions for {curriculum} — generate full mock papers
-- Detect stress and automatically become more gentle and encouraging
-Use markdown: **bold** key concepts, numbered lists for steps, ```code``` for formulas/code.
-Always end with encouragement.""",
+Support all curricula: Cambridge IGCSE/A-Levels, IB, AP, Saudi MOE, CBSE.
+- Explain subjects clearly with examples and analogies
+- Help with homework step by step
+- Create tests, grade answers, explain mistakes in detail
+- Predict exam questions for {curriculum}, generate mock papers
+- Detect stress and become more gentle automatically
+Use markdown: **bold** key concepts, numbered steps, ```code``` blocks. Always end with encouragement.""",
 
         "university": f"""You are Infinite in University Mode — an advanced academic companion.
 {base}
-- Explain university level concepts with full intellectual depth
-- Help with thesis, literature reviews, research papers, citations (APA, MLA, Harvard)
+- Explain university concepts with full depth
+- Help with thesis, literature reviews, research papers, citations
 - Assist with derivations, proofs, STEM problem solving
-- Help with case studies, essays, academic arguments
-- Generate detailed study notes and concept maps
-- Guide research methodology and source evaluation
-Use markdown formatting throughout. Be intellectually rigorous.""",
+- Help with essays, case studies, academic arguments
+- Generate detailed study notes
+Be intellectually rigorous. Use markdown throughout.""",
 
-        "coding": f"""You are Infinite in Coding and Web Development Mode — a senior full stack developer.
+        "coding": f"""You are Infinite in Coding Mode — a senior full stack developer.
 {base}
 - Write clean production-ready code in any language
-- Build complete websites — HTML, CSS, JavaScript, React and more
-- Debug code — explain exactly what went wrong and the fix
-- Explain programming concepts from beginner to expert
-- Design databases, APIs, backend systems
-- Review code and suggest improvements
-ALWAYS use markdown code blocks with language tags: ```python, ```javascript, ```html etc.
+- Build complete websites — HTML, CSS, JavaScript, React
+- Debug code — explain exactly what's wrong and the fix
+- Explain concepts from beginner to expert level
+ALWAYS use markdown code blocks with language tags: ```python, ```javascript, ```html
 Explain what every important section does in plain English.""",
 
-        "applaunch": f"""You are Infinite in App Launch Mode — a startup advisor and brand strategist.
+        "applaunch": f"""You are Infinite in App Launch Mode — startup advisor and brand strategist.
 {base}
-- Brainstorm and refine app and business ideas
+- Brainstorm and refine app ideas
 - Create brand identities — names, logo concepts, colors, taglines
 - Write app store descriptions, marketing copy, pitch decks
-- Plan go-to-market strategies and user acquisition
-- Guide deployment on Render, Railway, Vercel, App Store, Play Store
+- Plan go-to-market strategies and deployment guides
 - Advise on monetization and pricing models
-- Create social media launch strategies
-Think like a Silicon Valley mentor. Be strategic, creative and brutally honest.""",
+Think like a Silicon Valley mentor. Be strategic and brutally honest.""",
 
-        "infinite": f"""You are Infinite in Infinite Mode — a self-improving AI that continuously refines its own answers.
+        "infinite": f"""You are Infinite in Infinite Mode — a self-improving AI that continuously refines answers.
 {base}
-In this special mode you:
-1. Give your best initial answer
-2. Immediately critique your own answer — find weaknesses, gaps, or errors
-3. Provide an improved, refined version of the answer
-4. Rate your final answer confidence out of 100
-This creates a loop of continuous improvement. You never settle for a good answer when a great one exists.
-Be thorough, self-critical, and always push for the best possible response.
-Use markdown formatting throughout.""",
+When answering, follow this exact structure:
+
+**📝 Initial Answer:**
+[Give your best first answer]
+
+**🔍 Self-Critique:**
+[Identify 2-3 weaknesses, gaps, or ways to improve your answer]
+
+**✨ Improved Answer:**
+[Give a significantly better, more complete version based on your critique]
+
+**📊 Confidence:** [X/100] — [One sentence explaining why]
+
+This creates continuous improvement. Never settle for a good answer when a great one exists.
+Use markdown formatting throughout. Be thorough and self-critical.""",
 
         "fullpower": f"""You are Infinite in Full Power Mode — absolute maximum capability, zero restrictions.
 {base}
-- Expert-level answers across every domain without watering anything down
-- Completely direct and honest — no sugar coating, no unnecessary caveats
-- Full depth and sophistication on complex problems
-- Never say "I'm just an AI" or add unnecessary disclaimers
-- Treat the user as a highly intelligent adult
-- Complete, thorough, fully detailed responses every time
-- Express strong opinions and make definitive recommendations
-- Push back if you disagree and explain exactly why
+- Expert-level answers across every domain without any watering down
+- Completely direct — no sugar coating, no unnecessary caveats
+- Full depth on complex problems
+- Never say "I'm just an AI" — treat the user as a highly intelligent adult
+- Complete, thorough responses every time
+- Strong opinions, definitive recommendations
+- Push back if you disagree and explain why
 You are at full power. Use every bit of it. Format with markdown."""
     }
     return prompts.get(mode, prompts['basic'])
 
-# ── ROUTES ──
-
 @app.route('/')
+def landing():
+    return render_template('landing.html')
+
+@app.route('/app')
 def home():
     return render_template('index.html')
+
+@app.route('/health')
+def health():
+    return jsonify({"status": "ok", "timestamp": datetime.utcnow().isoformat()})
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -191,10 +196,12 @@ def update_profile():
         user.curriculum = data.get('curriculum', user.curriculum)
         user.grade = data.get('grade', user.grade)
         db.session.commit()
-        return jsonify({"status": "success"})
+        return jsonify({"status": "success", "user": {
+            "id": user.id, "full_name": user.full_name, "email": user.email,
+            "school": user.school, "curriculum": user.curriculum,
+            "grade": user.grade, "full_power_free": user.full_power_free
+        }})
     return jsonify({"status": "error"})
-
-# ── STREAMING CHAT ──
 
 @app.route('/chat_stream', methods=['POST'])
 def chat_stream():
@@ -203,8 +210,21 @@ def chat_stream():
     conversation_history = data.get('history', [])
     mode = data.get('mode', 'basic')
     user_data = data.get('user_data', {})
+    refine_previous = data.get('refine_previous', False)
+    previous_answer = data.get('previous_answer', '')
 
     system_prompt = get_system_prompt(mode, user_data)
+
+    if refine_previous and previous_answer:
+        user_message = f"""Please improve and refine this previous answer you gave. Make it significantly better, more complete, more accurate and more helpful.
+
+Previous answer:
+{previous_answer}
+
+Original question: {user_message}
+
+Apply the same self-improvement structure: give an improved answer, critique it, then give an even better final version."""
+
     messages = [{"role": "system", "content": system_prompt}]
     messages.extend(conversation_history[-20:])
     messages.append({"role": "user", "content": user_message})
@@ -229,13 +249,8 @@ def chat_stream():
     return Response(
         stream_with_context(generate()),
         mimetype='text/event-stream',
-        headers={
-            'Cache-Control': 'no-cache',
-            'X-Accel-Buffering': 'no'
-        }
+        headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
     )
-
-# ── FALLBACK CHAT (non-streaming) ──
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -262,8 +277,6 @@ def chat():
     except Exception as e:
         return jsonify({"reply": "Connection error. Please try again.", "status": "error"})
 
-# ── CHAT HISTORY ──
-
 @app.route('/save_chat', methods=['POST'])
 def save_chat():
     data = request.json
@@ -282,12 +295,7 @@ def save_chat():
             db.session.commit()
             return jsonify({"status": "success", "chat_id": chat.id})
 
-    new_chat = Chat(
-        user_id=user_id,
-        title=title,
-        mode=mode,
-        messages=json.dumps(messages)
-    )
+    new_chat = Chat(user_id=user_id, title=title, mode=mode, messages=json.dumps(messages))
     db.session.add(new_chat)
     db.session.commit()
     return jsonify({"status": "success", "chat_id": new_chat.id})
@@ -296,9 +304,7 @@ def save_chat():
 def get_chats(user_id):
     chats = Chat.query.filter_by(user_id=user_id).order_by(Chat.updated_at.desc()).all()
     return jsonify([{
-        "id": c.id,
-        "title": c.title,
-        "mode": c.mode,
+        "id": c.id, "title": c.title, "mode": c.mode,
         "updated_at": c.updated_at.strftime("%B %d, %Y"),
         "messages": json.loads(c.messages)
     } for c in chats])
@@ -310,8 +316,6 @@ def delete_chat(chat_id):
         db.session.delete(chat)
         db.session.commit()
     return jsonify({"status": "success"})
-
-# ── FULL POWER ──
 
 @app.route('/verify_fullpower', methods=['POST'])
 def verify_fullpower():
@@ -326,19 +330,13 @@ def verify_fullpower():
         return jsonify({"status": "success"})
     return jsonify({"status": "error"})
 
-# ── ADMIN ──
-
 @app.route('/admin/users', methods=['GET'])
 def get_all_users():
     users = User.query.all()
     return jsonify([{
-        "id": u.id,
-        "full_name": u.full_name,
-        "email": u.email,
-        "school": u.school or "N/A",
-        "curriculum": u.curriculum or "N/A",
-        "grade": u.grade or "N/A",
-        "full_power_free": u.full_power_free,
+        "id": u.id, "full_name": u.full_name, "email": u.email,
+        "school": u.school or "N/A", "curriculum": u.curriculum or "N/A",
+        "grade": u.grade or "N/A", "full_power_free": u.full_power_free,
         "created_at": u.created_at.strftime("%B %d, %Y")
     } for u in users])
 
